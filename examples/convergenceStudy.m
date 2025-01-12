@@ -79,19 +79,19 @@ for n = 1:length(orders)
         % Z-axis points (x=y=0)
         if abs(pos) > R
             p = [0; 0; pos];
-            P_z(i,n) = sphereAndersonSolution(p, c0, rho0, c1, rho1, R, omega, current_order);
+            P_z(i,n) = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, current_order);
         end
         
         % X-axis points (y=z=0)
         if abs(pos) > R
             p = [pos; 0; 0];
-            P_x(i,n) = sphereAndersonSolution(p, c0, rho0, c1, rho1, R, omega, current_order);
+            P_x(i,n) = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, current_order);
         end
         
         % Diagonal points (x=z, y=0)
         if abs(pos) > R/sqrt(2)  % Account for diagonal intersection
             p = [pos; 0; pos];  % x = z
-            P_diag(i,n) = sphereAndersonSolution(p, c0, rho0, c1, rho1, R, omega, current_order);
+            P_diag(i,n) = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, current_order);
         end
     end
     

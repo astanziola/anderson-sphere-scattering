@@ -87,7 +87,7 @@ function P = computeModalExpansion(order, k0, k1, R, rho0, c0, rho1, c1, kr, mu)
         
         % Compute spherical wave functions
         h1_m = computeSphericalHankel(m, kr);
-        Pm = legendrePolynomial(m, mu);
+        Pm = evaluateLegendrePolynomial(m, mu);
         
         % Add modal contribution
         P = P + Am * Pm * h1_m;

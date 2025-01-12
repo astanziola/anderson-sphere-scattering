@@ -19,12 +19,12 @@ c0 = 1.0;        % Speed of sound in surrounding medium
 rho0 = 1.0;      % Density of surrounding medium
 
 % Sphere properties
-c1 = 1.7;        % Speed of sound in sphere
-rho1 = 2.5;      % Density of sphere
-R = 0.2;         % Sphere radius
+c1 = 0.3;        % Speed of sound in sphere
+rho1 = 0.05;      % Density of sphere
+R = 0.15;         % Sphere radius
 
 % Wave properties
-f = 20.0;         % Base frequency
+f = 35.0;         % Base frequency
 omega = f*2*pi; % Angular frequency (chosen for visible scattering effects)
 order = 50;      % Maximum order for modal expansion
 
@@ -119,7 +119,7 @@ for idx = 1:length(order_indices)
         p = [X(j,i); 0; Z(j,i)];  % Point in 3D space (y = 0)
 
         % Main computation
-        P(j,i) = sphereAndersonSolution(p, c0, rho0, c1, rho1, R, omega, order);
+        P(j,i) = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, order);
 
         % Update visualization periodically
         if mod(point_count, update_interval) == 0
