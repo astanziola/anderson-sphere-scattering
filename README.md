@@ -9,13 +9,13 @@ This repository provides a MATLAB implementation of Anderson's analytical soluti
 The implementation follows [Anderson's 1950 paper](https://pubs.aip.org/asa/jasa/article-abstract/22/4/426/619489/Sound-Scattering-from-a-Fluid-Sphere), which solves the acoustic scattering problem using:
 - Modal expansion using spherical Bessel and Hankel functions for radial components
 - Legendre polynomials for angular dependence
-- Assumes incident plane wave propagating in the negative z-direction
+- Assumes an incident plane wave propagating in the negative z-direction
 
-The solution is valid outside the ssphere, for any combination of fluid properties (sound speed and density).
+The solution is valid outside the sphere, for any combination of fluid properties (sound speed and density).
 
 ## Getting Started
 
-The code requires only core MATLAB. It was tested on MATLAB R2024b.
+The code requires only core MATLAB. It has been tested on MATLAB R2024b.
 
 ### Installation
 
@@ -76,4 +76,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## References
 
 1. Anderson V. C. (1950). "Sound scattering from a fluid sphere." The Journal of the Acoustical Society of America, July 1950; 22 (4): 426–431
-2. McNew  J., Lavarello R., O’Brien W. "Sound scattering from two concentric fluid spheres." The Journal of the Acoustical Society of America, 2007 Nov; 122(5):2968
+2. McNew  J., Lavarello R., O’Brien W. (2007) "Sound scattering from two concentric fluid spheres." The Journal of the Acoustical Society of America, 2007 Nov; 122(5):2968
