@@ -71,7 +71,7 @@ Two example scripts are provided to demonstrate the code:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the LGPL-3.0 license - see the LICENSE file for details.
 
 ## References
 
