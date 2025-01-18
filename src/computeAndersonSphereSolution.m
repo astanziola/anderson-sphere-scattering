@@ -1,4 +1,4 @@
-function P = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, order)
+function P = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, order, options)
     % COMPUTEANDERSONSPHERESOLUTION Computes the acoustic scattering from a fluid sphere
     %   This function calculates the analytical solution for acoustic scattering
     %   from a fluid sphere in a fluid medium using Anderson's formulation.
@@ -57,6 +57,8 @@ function P = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, orde
         R {mustBeNumeric, mustBePositive}
         omega {mustBeNumeric, mustBePositive}
         order {mustBeNumeric, mustBeInteger, mustBeNonnegative}
+        options.kind {mustBeMember(options.kind, {'plane-wave', 'point-source'})} = 'plane-wave'
+        options.D {mustBeNumeric, mustBePositive} = 1.0  % Point source distance on the z-axis
     end
 
     % Convert Cartesian to spherical coordinates
@@ -72,18 +74,30 @@ function P = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, orde
     mu = cos(theta);                   % Directivity variable
     
     % Compute scattered field using modal expansion
-    P = computeModalExpansion(order, k0, k1, R, rho0, c0, rho1, c1, kr, mu);
+    use_point_source = strcmp(options.kind, 'point-source');
+    P = computeModalExpansion(order, k0, k1, R, rho0, c0, rho1, c1, kr, mu, use_point_source, options.D);
     
-    % Add incident plane wave
-    P = P + exp(-1i*k0*r*mu);
+    % Add incident wave
+    P = P + computeIncidentWave(k0, r, mu, use_point_source, options.D);
 end
 
-function P = computeModalExpansion(order, k0, k1, R, rho0, c0, rho1, c1, kr, mu)
+function P0 = computeIncidentWave(k0, r, mu, use_point_source, D)
+    % Compute the incident wave using a plane wave or point source
+    if ~use_point_source
+        P0 = exp(-1i*k0*r*mu);
+    else
+        % Monopoole source located in (0, 0, D)
+        r0 = sqrt(D^2 + r^2 - 2*D*r*mu);
+        P0 = exp(1i*k0*r0) / (4 * pi * r0);
+    end
+end
+
+function P = computeModalExpansion(order, k0, k1, R, rho0, c0, rho1, c1, kr, mu, use_point_source, D)
     % Compute the scattered field using modal expansion
     P = 0;
     for m = 0:order
         % Compute modal coefficient
-        Am = computeModalCoefficient(m, k0, k1, R, rho0, c0, rho1, c1);
+        Am = computeModalCoefficient(m, k0, k1, R, rho0, c0, rho1, c1, use_point_source, D);
         
         % Compute spherical wave functions
         h1_m = computeSphericalHankel(m, kr);
@@ -94,11 +108,16 @@ function P = computeModalExpansion(order, k0, k1, R, rho0, c0, rho1, c1, kr, mu)
     end
 end
 
-function Am = computeModalCoefficient(m, k0, k1, r, rho0, c0, rho1, c1)
+function Am = computeModalCoefficient(m, k0, k1, r, rho0, c0, rho1, c1, use_point_source, D)
     % Compute the modal coefficient Am according to equation (14) in 
     % https://pmc.ncbi.nlm.nih.gov/articles/PMC3132099/
     
-    Lm = (-1i)^m;
+    if use_point_source
+        Lm = computeSphericalHankel(m, k0*D);
+    else
+        Lm = (-1i)^m;
+    end
+
     Z0 = rho0 * c0;
     Z1 = rho1 * c1;
     
