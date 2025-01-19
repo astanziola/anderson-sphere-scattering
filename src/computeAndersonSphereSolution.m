@@ -88,7 +88,7 @@ function P0 = computeIncidentWave(k0, r, mu, use_point_source, D)
     else
         % Monopoole source located in (0, 0, D)
         r0 = sqrt(D^2 + r^2 - 2*D*r*mu);
-        P0 = exp(1i*k0*r0) / (4 * pi * r0);
+        P0 = exp(1i*k0*r0) / (1i * k0 * r0);
     end
 end
 
