@@ -2,16 +2,16 @@
 
 ![Acoustic scattering visualization](cover_image.png)
 
-This repository provides a MATLAB implementation of Anderson's analytical solution for acoustic scattering from a fluid sphere in a fluid medium. The implementation computes the scattered pressure field at any point outside a fluid sphere when subjected to an incident plane wave.
+This repository provides a MATLAB implementation of Anderson's analytical solution for acoustic scattering from a fluid sphere in a fluid medium. The implementation computes the scattered pressure field at any point outside a fluid sphere when subjected to an incident plane wave or to a point source.
 
 ## Theory
 
-The implementation follows [Anderson's 1950 paper](https://pubs.aip.org/asa/jasa/article-abstract/22/4/426/619489/Sound-Scattering-from-a-Fluid-Sphere), which solves the acoustic scattering problem using:
+The implementation follows [Anderson's 1950 paper](https://pubs.aip.org/asa/jasa/article-abstract/22/4/426/619489/Sound-Scattering-from-a-Fluid-Sphere), and the subsequent extension of [McNew et al.](https://pmc.ncbi.nlm.nih.gov/articles/PMC3132099/pdf/nihms284533.pdf), which solves the acoustic scattering problem using:
 - Modal expansion using spherical Bessel and Hankel functions for radial components
 - Legendre polynomials for angular dependence
-- Assumes an incident plane wave propagating in the negative z-direction
+- Assumes an incident plane wave propagating in the negative z-direction or a point source on the `z`axis, at a distance `D` form the sphere.
 
-The solution is valid outside the sphere, for any combination of fluid properties (sound speed and density).
+The solution is valid outside the sphere, for any valid combination of fluid properties (sound speed and density).
 
 ## Getting Started
 
@@ -34,7 +34,7 @@ addpath(genpath("anderson-sphere-scattering"))
 The main function `computeAndersonSphereSolution` calculates the scattered field at any point outside the sphere:
 
 ```matlab
-P = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, order)
+P = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, order, options)
 ```
 
 #### Parameters:
@@ -46,13 +46,16 @@ P = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, order)
 - `R`: Radius of the sphere (m)
 - `omega`: Angular frequency of the incident wave (rad/s)
 - `order`: Maximum order of spherical harmonics to include
+- `options.kind`: The kind of source to use, can be one of `{'plane-wave', 'point-source'}`
+- `options.D`: The distance of the point source in the `z` axis
 
 ## Example Usage
 
-Two example scripts are provided to demonstrate the code:
+Several example scripts are provided to demonstrate the code:
 
-1. `examples/anderson_sphere_example.m`: An example script showing the scattered field in the x-z plane
+1. `examples/anderson_sphere_example.m`: An example script showing the scattered field in the x-z plane for a plane wave source
 2. `examples/anderson_sphere_convergence.m`: An example script demonstrating how to analyze the convergence of the solution and provides convergence plots for different directions
+3. `examples/example_point_source.m`: An example script showing the scattered field in the x-z plane for a point source
 
 ## Function Documentation
 
