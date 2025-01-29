@@ -117,7 +117,7 @@ function [Am, Bm] = computeModalCoefficient(m, k0, k1, r, rho0, c0, rho1, c1, us
     numerator_A = j1_m_k1r * jm_k0r * Z0 - j1_m_k0r * jm_k1r * Z1;
     Am = Lm2m1 * numerator_A ./ denominator;
 
-    numerator_B = -Z1 * (hm_k0r * j1_m_k0r + h1_m_k0r * jm_k0r);
+    numerator_B = Z1 * (-hm_k0r * j1_m_k0r + h1_m_k0r * jm_k0r);
     Bm = Lm2m1 * numerator_B ./ denominator;
 end
 
