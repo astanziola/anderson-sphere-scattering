@@ -1,4 +1,4 @@
-%% Anderson Sphere Scattering Example (Vectorized)
+%% Point Source Scattering Example
 % This script demonstrates the acoustic scattering from a fluid sphere using
 % Anderson's analytical solution. It visualizes both the real part and magnitude
 % of the scattered pressure field in the xz-plane.
@@ -16,14 +16,14 @@ c0 = 1.0;        % Speed of sound in surrounding medium
 rho0 = 1.0;      % Density of surrounding medium
 
 % Sphere properties
-c1 = 2.0;        % Speed of sound in sphere
-rho1 = 2.0;      % Density of sphere
-R = 0.25;        % Sphere radius
+c1 = 1.5;        % Speed of sound in sphere
+rho1 = 3.0;      % Density of sphere
+R = 0.35;        % Sphere radius
 
 % Wave properties
-f = 5.0;         % Base frequency
+f = 15;         % Base frequency
 omega = 2*pi*f;  % Angular frequency
-order = 150;     % Maximum order for modal expansion
+order = 250;     % Maximum order for modal expansion
 D = 1.2;         % Point source distance on the z-axis
 
 % Wavelength in the background medium
@@ -31,7 +31,7 @@ fprintf('Wavelength in the background medium: %.3f m\n', c0/f)
 
 %% Setup computational grid
 % Define spatial grid in xz-plane (y = 0)
-grid_points = 201;
+grid_points = 301;
 domain_size = 1.0;
 x_range = linspace(-domain_size, domain_size, grid_points);
 z_range = linspace(-domain_size, domain_size, grid_points);
@@ -44,21 +44,11 @@ positions(1,:) = X(:)';  % x coordinates
 positions(2,:) = 0;      % y coordinates (all zero)
 positions(3,:) = Z(:)';  % z coordinates
 
-% Calculate radii and create mask for points outside sphere
-radii = sqrt(sum(positions.^2, 1));
-outside_sphere = radii > R;
-
-% Only compute for points outside sphere
-valid_positions = positions(:, outside_sphere);
-
 %% Calculate pressure field (vectorized)
 % Compute pressure for all valid points at once
-P_valid = computeAndersonSphereSolution(valid_positions, c0, rho0, c1, rho1, R, omega, order, ...
+P = computeAndersonSphereSolution(positions, c0, rho0, c1, rho1, R, omega, order, ...
     'kind', 'point-source', 'D', D);
-
-% Map results back to full grid
-P = zeros(size(X));
-P(outside_sphere) = P_valid;
+P = reshape(P, size(X));
 
 %% Setup visualization
 figure('Position', [100 100 1500 400], 'Name', 'Anderson Sphere Scattering (Vectorized)')
@@ -91,6 +81,9 @@ title('Absolute Value of Pressure Field')
 xlabel('x (m)')
 ylabel('z (m)')
 hold on
+
+% Draw sphere outline
+theta = linspace(0, 2*pi, 100);
 plot(R*cos(theta), R*sin(theta), 'w.', 'LineWidth', 3)
 hold off
 
@@ -101,7 +94,6 @@ p_z_line = P(:, center_i);
 plot(z_range, abs(p_z_line), 'b-', 'LineWidth', 1.5);
 hold on
 plot(z_range, real(p_z_line), 'r--', 'LineWidth', 1.5);
-plot([-R R], [0 0], 'k', 'LineWidth', 20);  % Sphere boundaries
 xlabel('z (m)')
 ylabel('Pressure')
 title('Pressure Along z-axis (x = 0)')
@@ -111,11 +103,11 @@ grid on
 % Set color limits for consistent visualization
 p_real_max = max(abs(real(P(:))));
 p_abs_max = max(abs(P(:)));
-p_abs_min = min(abs(P(outside_sphere)));
+p_abs_min = min(abs(P(:)));
 
 subplot(1,3,1); clim([-p_real_max, p_real_max]);
 subplot(1,3,2); clim([p_abs_min, p_abs_max]);
-subplot(1,3,3); ylim([-p_real_max, p_real_max]);
+subplot(1,3,3); ylim([-p_abs_max, p_abs_max]);
 
 %% Add title with simulation parameters
 sgtitle(sprintf(['Acoustic Scattering from Fluid Sphere\n', ...

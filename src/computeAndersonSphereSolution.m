@@ -38,20 +38,19 @@ function P = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, orde
     r = sqrt(sum(p.^2, 1));  % Compute radius for each point
     theta = acos(p(3,:)./r);  % Compute theta for each point
     
-    validatePosition(r, R);
-    
     % Calculate wave properties (vectorized)
     k0 = omega/c0;                     % Wavenumber in medium
     k1 = omega/c1;                     % Wavenumber in sphere
-    kr = k0*r;                         % Dimensionless radius
     mu = cos(theta);                   % Directivity variable
     
     % Compute scattered field using modal expansion
     use_point_source = strcmp(options.kind, 'point-source');
-    P = computeModalExpansion(order, k0, k1, R, rho0, c0, rho1, c1, kr, mu, use_point_source, options.D);
+    P = computeModalExpansion(order, k0, k1, R, rho0, c0, rho1, c1, r, mu, use_point_source, options.D);
     
     % Add incident wave
-    P = P + computeIncidentWave(k0, r, mu, use_point_source, options.D);
+    points_outside = r >= R;
+    P(points_outside) = P(points_outside) + computeIncidentWave(...
+        k0, r(points_outside), mu(points_outside), use_point_source, options.D);
 end
 
 function P0 = computeIncidentWave(k0, r, mu, use_point_source, D)
@@ -65,30 +64,40 @@ function P0 = computeIncidentWave(k0, r, mu, use_point_source, D)
     end
 end
 
-function P = computeModalExpansion(order, k0, k1, R, rho0, c0, rho1, c1, kr, mu, use_point_source, D)
+function P = computeModalExpansion(order, k0, k1, R, rho0, c0, rho1, c1, r, mu, use_point_source, D)
     % Compute the scattered field using modal expansion (vectorized)
-    P = zeros(size(kr));  % Initialize output array
+    P = zeros(size(r));  % Initialize output array
+
+    % Compute points inside and outside
+    kr = k0*r;
+    k1r = k1*r;
+    points_outside = r >= R;
+    points_inside = r < R;
     
     for m = 0:order
         % Compute modal coefficient (scalar)
-        Am = computeModalCoefficient(m, k0, k1, R, rho0, c0, rho1, c1, use_point_source, D);
+        [Am, Bm] = computeModalCoefficient(m, k0, k1, R, rho0, c0, rho1, c1, use_point_source, D);
         
-        % Compute spherical wave functions (vectorized)
-        h1_m = computeSphericalHankel(m, kr);
-        Pm = evaluateLegendrePolynomial(m, mu);
-        
-        % Add modal contribution (vectorized)
-        P = P + Am * Pm .* h1_m;
+        % Field values outside the sphere
+        hm = computeSphericalHankel(m, kr(points_outside));
+        Pm = evaluateLegendrePolynomial(m, mu(points_outside));
+        P(points_outside) = P(points_outside) + Am * Pm .* hm;
+
+        % Field values inside the sphere
+        jm = computeSphericalBesselj(m, k1r(points_inside));    
+        Pm = evaluateLegendrePolynomial(m, mu(points_inside));
+        P(points_inside) = P(points_inside) + Bm * Pm .* jm;
     end
 end
 
-function Am = computeModalCoefficient(m, k0, k1, r, rho0, c0, rho1, c1, use_point_source, D)
+function [Am, Bm] = computeModalCoefficient(m, k0, k1, r, rho0, c0, rho1, c1, use_point_source, D)
     % Modal coefficient computation remains the same as it's scalar
     if use_point_source
         Lm = computeSphericalHankel(m, k0.*D);
     else
         Lm = (-1i).^m;
     end
+    Lm2m1 = (2*m + 1) * Lm;
 
     Z0 = rho0 * c0;
     Z1 = rho1 * c1;
@@ -103,10 +112,13 @@ function Am = computeModalCoefficient(m, k0, k1, r, rho0, c0, rho1, c1, use_poin
     hm_k0r = computeSphericalHankel(m, k0r);
     h1_m_k0r = computeSphericalHankelDerivative(m, k0r);
     
-    numerator = j1_m_k1r * jm_k0r * Z0 - j1_m_k0r * jm_k1r * Z1;
     denominator = -j1_m_k1r * hm_k0r * Z0 + h1_m_k0r * jm_k1r * Z1;
     
-    Am = (2*m + 1) * Lm * numerator / denominator;
+    numerator_A = j1_m_k1r * jm_k0r * Z0 - j1_m_k0r * jm_k1r * Z1;
+    Am = Lm2m1 * numerator_A ./ denominator;
+
+    numerator_B = Z1 * (-hm_k0r * j1_m_k0r + h1_m_k0r * jm_k0r);
+    Bm = Lm2m1 * numerator_B ./ denominator;
 end
 
 function j1_m = computeSphericalBesseljDerivative(m, x)
@@ -153,14 +165,6 @@ function ym = computeSphericalBessely(m, x)
     
     Ym = bessely(m + 0.5, x);
     ym = sqrt(pi./(2*x)) .* Ym;
-end
-
-function validatePosition(r, R)
-    % Validate that all evaluation points are outside the sphere (vectorized)
-    if any(r <= R)
-        error('AndersonSolution:InvalidPosition', ...
-              'All evaluation points must be outside the sphere (r > R)');
-    end
 end
 
 % Custom validation functions
