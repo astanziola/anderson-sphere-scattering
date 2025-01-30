@@ -38,7 +38,8 @@ P = computeAndersonSphereSolution(p, c0, rho0, c1, rho1, R, omega, order, option
 ```
 
 #### Parameters:
-- `p`: Position vector `[x; y; z]` where to evaluate the solution (m)
+- `p`: `3xN` matrix containing `N` position vectors `[x; y; z]` where to evaluate the solution (m). 
+        Note that for `N=0` the function returns `NaN`.
 - `c0`: Speed of sound in the surrounding medium (m/s)
 - `rho0`: Density of the surrounding medium (kg/m³)
 - `c1`: Speed of sound in the sphere (m/s)
