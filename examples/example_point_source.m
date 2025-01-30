@@ -1,4 +1,4 @@
-%% Anderson Sphere Scattering Example (Vectorized)
+%% Point Source Scattering Example
 % This script demonstrates the acoustic scattering from a fluid sphere using
 % Anderson's analytical solution. It visualizes both the real part and magnitude
 % of the scattered pressure field in the xz-plane.
@@ -17,13 +17,13 @@ rho0 = 1.0;      % Density of surrounding medium
 
 % Sphere properties
 c1 = 1.5;        % Speed of sound in sphere
-rho1 = 1.5;      % Density of sphere
-R = 0.25;        % Sphere radius
+rho1 = 3.0;      % Density of sphere
+R = 0.35;        % Sphere radius
 
 % Wave properties
-f = 10.0;         % Base frequency
+f = 15;         % Base frequency
 omega = 2*pi*f;  % Angular frequency
-order = 150;     % Maximum order for modal expansion
+order = 250;     % Maximum order for modal expansion
 D = 1.2;         % Point source distance on the z-axis
 
 % Wavelength in the background medium
@@ -31,7 +31,7 @@ fprintf('Wavelength in the background medium: %.3f m\n', c0/f)
 
 %% Setup computational grid
 % Define spatial grid in xz-plane (y = 0)
-grid_points = 201;
+grid_points = 301;
 domain_size = 1.0;
 x_range = linspace(-domain_size, domain_size, grid_points);
 z_range = linspace(-domain_size, domain_size, grid_points);
@@ -65,6 +65,11 @@ xlabel('x (m)')
 ylabel('z (m)')
 hold on
 
+% Draw sphere outline
+theta = linspace(0, 2*pi, 100);
+plot(R*cos(theta), R*sin(theta), 'w.', 'LineWidth', 3)
+hold off
+
 % Setup magnitude subplot
 ax(2) = subplot(1,3,2);
 h2 = imagesc(x_range, z_range, abs(P));
@@ -75,6 +80,12 @@ ylabel(cb2, 'Pressure (Magnitude)');
 title('Absolute Value of Pressure Field')
 xlabel('x (m)')
 ylabel('z (m)')
+hold on
+
+% Draw sphere outline
+theta = linspace(0, 2*pi, 100);
+plot(R*cos(theta), R*sin(theta), 'w.', 'LineWidth', 3)
+hold off
 
 % Setup z-axis line plot
 ax(3) = subplot(1,3,3);
@@ -96,7 +107,7 @@ p_abs_min = min(abs(P(:)));
 
 subplot(1,3,1); clim([-p_real_max, p_real_max]);
 subplot(1,3,2); clim([p_abs_min, p_abs_max]);
-subplot(1,3,3); ylim([-p_real_max, p_real_max]);
+subplot(1,3,3); ylim([-p_abs_max, p_abs_max]);
 
 %% Add title with simulation parameters
 sgtitle(sprintf(['Acoustic Scattering from Fluid Sphere\n', ...
